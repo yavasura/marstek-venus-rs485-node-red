@@ -334,7 +334,7 @@ views:
             text_only: true
           - type: history-graph
             entities:
-              - entity: input_number.house_battery_control_pid_output
+              - entity: sensor.pid_output
                 name: PID control
               - entity: sensor.p1_meter_power
                 name: Grid power
@@ -373,7 +373,6 @@ views:
                   - condition: numeric_state
                     entity: input_number.house_battery_control_error_signal_dampening
                     above: 70
-                    below: 0
                   - condition: numeric_state
                     entity: input_number.house_battery_control_pid_output_dampening
                     above: 50
@@ -568,7 +567,7 @@ views:
     header:
       card:
         type: markdown
-        content: '### Home Battery Control *(v4.6.2)*'
+        content: '### Home Battery Control *(v4.6.3)*'
         text_only: true
     cards: []
   - type: sections
@@ -619,7 +618,6 @@ views:
                   - condition: numeric_state
                     entity: input_number.house_battery_control_error_signal_dampening
                     above: 70
-                    below: 0
                   - condition: numeric_state
                     entity: input_number.house_battery_control_pid_output_dampening
                     above: 50
