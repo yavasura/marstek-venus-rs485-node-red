@@ -16,28 +16,44 @@ nav_order: 6
   - Configurable through the Advanced Settings dashboard
 
 ## Battery Life
-- **Minimum Idle Time:** Configurable minimum time before allowing battery grid relay disengagement
+- **Stop after idle time:** Configurable minimum time before allowing battery grid relay disengagement
   - Reduces relay wear and extends battery life
   - Eliminates clicking/clacking noises during frequent charge/discharge transitions around 0W
   - Configurable through Home Assistant dashboard
-- **Hysteresis:** Prevents excessive switching between charge and discharge mode around the 0 Watt line. 
+  - Recommended setting: 5 min
+- **Hysteresis:** Smooths your system during the period where your energy usage equals the energy production (equilibrium)
+   - Prevents excessive switching between charge and discharge mode around the 0 Watt line.
    - If the PID output level lies within hysteresis, it will not switch from charge to discharge or vise versa. 
    - 0 = apply no hysteresis
-- **Battery charge order:** determines which battery gets charged first (Multi-battery only)
+   - _Recommended setting_: off (0W)
+    - Observe your home with hysteresis turned off during equilibrium. If it looks good. Leave it off. 
+   - _Alternate setting_: 200W 
+     - If the system swings up and down a lot during equilibrium, turn hysteresis up to see if it improves. 
+- **Cycle which battery to charge first:** (Multi-battery only)
    - Batteries gets charged in order. By changing which battery is first in order, you can optimize battery wear.
    - Especially during cloudy periods when the first battery takes the grunt of the charging and discharging.
-   - The **Auto Cycle** feature changes the order of the batteries automatically each night or each week
-      - Auto Cycling occurs at 02:00 hrs daily, or 02:00 hrs Sunday morning.
-      - Don't want auto cycling? Select Cycle priority "Never". 
+   - The **Cycle** setting controls how battery priority changes over time:
+
+     | Option | Behaviour |
+     |---|---|
+     | **Auto balance** | Rotates priority every 30 minutes throughout the day. Spreads energy reserve more evenly across all batteries, maximizing combined charge and discharge power delivery. Best for multi-battery setups where keeping batteries at similar SoC matters. |
+     | **Daily** | Rotates once per day at 02:00. |
+     | **Weekly** | Rotates once per week on Sunday at 02:00. |
+     | **Never** | Keeps the manually set priority. No automatic cycling. |
+
+   - **Auto balance** automatically disables the _reverse discharge priority_ optimization, since that feature is designed for batteries at different SoC levels and conflicts with balanced operation.
+   - **Tip:** For single-battery setups, cycling has no effect — any setting works.
 - **Controller Output Protection:** Software protection based on battery maximum charge/discharge values
   - Adjusts control output to stay within configured battery capabilities
 
 ## Performance Optimizations
-- **Rate Limiter:** Dynamically adjusts processing rate based on grid power changes to reduce CPU load
+- **Rate Limiter:** Dynamically adjusts processing rate based on grid power changes and system load to reduce CPU load
   - *Power saving mode:* Processes 0.333 messages/second (every 3 seconds) during stable operation
   - *Responsive mode:* Increases to 1 message/second when significant changes detected (>20W AND >2%)
-  - Automatically switches between modes based on power fluctuations
-  - Change thresholds in `Home Battery Start` → `Rate limiter` → `F:node P1 change (20W or 2%)`
+  - *High load cool-down:* If the previous strategy execution took ≥ 1.0 second, high load is detected and the system is forced into power saving mode for the next cycle, regardless of power changes. This gives the system time to recover and helps prevent Node-RED from grinding to a halt during error storms or excessive load.
+  - Automatically switches between modes based on power fluctuations and execution time
+  - Change P1 change thresholds in `Home Battery Start` → `Rate limiter` → `F:node P1 change (20W or 2%)`
+  - Change the execution time threshold in `Home Battery Start` → `Rate limiter` → `F:node Operational thresholds`
 - **Deadband:** Control loop only activates when _P1 error_ is outside the deadband threshold
   - Further reduces unnecessary battery adjustments during stable operation
   - Change the deadband in `Strategy Self-consumption` → `F:node Deadband(15W)` 
@@ -46,8 +62,8 @@ nav_order: 6
   - Note: the SET MODE action nodes have proven unreliable, for _safety reasons_ the `On Change` RBE has been left out.
 
 ## Multi-Battery Management
-- **More than 4 batteries:** Override or change `input_number.house_battery_count` and you are good to go.
-  - The dashboard supports 4 batteries out of the box, duplicate and edit these or create your own dashboard.
+- **More than 6 batteries:** Override or change `input_number.house_battery_count` and you are good to go.
+  - The dashboard supports 6 batteries out of the box. For 7 or more, duplicate and edit these cards or create your own dashboard.
 - **3-Phase self-consumption:** if you require 0 W grid consumption on a per phase basis, the setup changes slightly. 
       
       Note: most homes get billed for the net total of all phases. If that is the case for you as well, ignore these instructions.

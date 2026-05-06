@@ -1,6 +1,71 @@
 # Release Notes
 All releases follow Semantic Versioning (SemVer). Every release provides a fresh `home assistant/dashboard.yaml` to import.
 
+## 4.8.2
+- **Feat: High load detection reduces update rate**
+  * When excessive system load is detected, the control loop update rate is automatically throttled down.
+  * Together with the fixes below, this may address situations where Node-RED completely grinds to a halt due to excessive load and error storms.
+
+- **Fix: Unhandled exceptions no longer trigger the 'Missing return' warning**
+  * Exceptions in function nodes are now caught and handled, preventing spurious 'Missing return' warnings from polluting the debug log.
+
+- **Fix: Catch node scoping on Start flow and Self-consumption flow**
+  * Catch nodes were incorrectly scoped, causing unintended error capture across flows.
+
+- **Fix: Bumpless Ki working again**
+  * Bumpless integral gain (Ki) initialization is restored to correct behavior.
+
+- **Files Changed:**
+  - `home assistant/dashboard.yaml`
+  - `node-red/01 start-flow.json`
+  - `node-red/02 strategy-charge-pv.json`
+  - `node-red/02 strategy-charge.json`
+  - `node-red/02 strategy-dynamic.json`
+  - `node-red/02 strategy-full-stop.json`
+  - `node-red/02 strategy-self-consumption.json`
+  - `node-red/02 strategy-sell.json`
+  - `node-red/02 strategy-timed.json`
+
+## 4.8.1
+- **Fix: Correct entities in dashboard history-graph**
+  * The PID history-graph was referencing a non-existent `sensor.pid_output` for PID control, and the `input_number` for PID was mislabelled as "Grid power".
+  * Fixed to use `input_number.house_battery_control_pid_output` for PID control and `sensor.p1_meter_power` for grid power.
+
+- **Files Changed:**
+  - `home assistant/dashboard.yaml`
+
+## 4.8.0
+- **Feat: Auto balance battery priority cycle — fixes #114 #113**
+  * New **Auto balance** option for the battery priority cycle setting.
+  * Rotates battery priority every 30 minutes, spreading the energy reserve more evenly across all batteries throughout the day.
+  * This maximizes combined charge and discharge power delivery when batteries would otherwise drift to different SoC levels.
+  * When Auto balance is active, the _reverse discharge priority_ optimization is automatically disabled, as it conflicts with balanced multi-battery operation.
+  * Daily and Weekly cycle options trigger at 02:00, this is unchanged
+
+- **Files Changed:**
+  - `home assistant/dashboard.yaml`
+  - `home assistant/packages/house_battery_control.yaml`
+  - `node-red/01 start-flow.json`
+  - `node-red/02 strategy-self-consumption.json`
+
+## 4.7.1
+- Rounded power and PID values for better display on the dashboards
+
+- **Files Changed:**
+  - `home assistant/dashboard.yaml`
+  - `home assistant/packages/house_battery_control.yaml`
+  - `node-red/02 strategy-self-consumption.json`
+
+## 4.7.0
+- **Feat: Multi-battery support extended from 4 to 6 (M5–M6) — fixes #103**
+  * HBC now supports up to 6 batteries (M1–M6) out of the box with glance cards and per-battery configuration grids.
+  * Three phase homes using 2 batteries per phase, can now use HBC without modification.
+  * Thanks to _nickles-lee_ for the PR (#104) and _Stievo9997_ for field-testing with 6 batteries.
+
+- **Files Changed:**
+  - `home assistant/dashboard.yaml`
+  - `home assistant/packages/house_battery_control.yaml`
+
 ## 4.6.3
 - **Fix: EV trigger template fallback**
   * Fixed a bug in the EV is charging template using an undefined variable `bron_entity_id`.
